@@ -77,7 +77,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       input = '',
       enhancingPrompt,
       handleInputChange,
-      promptEnhanced,
+
+      // promptEnhanced,
       enhancePrompt,
       sendMessage,
       handleStop,
@@ -118,6 +119,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     useEffect(() => {
       // Load API keys from cookies on component mount
+
+      let parsedApiKeys: Record<string, string> | undefined = {};
+
       try {
         const storedApiKeys = Cookies.get('apiKeys');
 
@@ -126,6 +130,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
           if (typeof parsedKeys === 'object' && parsedKeys !== null) {
             setApiKeys(parsedKeys);
+            parsedApiKeys = parsedKeys;
           }
         }
       } catch (error) {
@@ -154,7 +159,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         Cookies.remove('providers');
       }
 
-      initializeModelList(providerSettings).then((modelList) => {
+      initializeModelList({ apiKeys: parsedApiKeys, providerSettings }).then((modelList) => {
         setModelList(modelList);
       });
 
@@ -490,10 +495,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       <IconButton
                         title="Enhance prompt"
                         disabled={input.length === 0 || enhancingPrompt}
-                        className={classNames(
-                          'transition-all',
-                          enhancingPrompt ? 'opacity-100' : '',
-                        )}
+                        className={classNames('transition-all', enhancingPrompt ? 'opacity-100' : '')}
                         onClick={() => {
                           enhancePrompt?.();
                           toast.success('Prompt enhanced!');
